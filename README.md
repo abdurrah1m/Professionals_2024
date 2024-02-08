@@ -264,6 +264,69 @@ b)	Используйте парольную аутентификацию.
 c)	Обеспечьте динамическую маршрутизацию: ресурсы одного офиса должны быть доступны из другого офиса.  
 d)	Для обеспечения динамической маршрутизации используйте протокол OSPF.  
 
+https://sysahelper.gitbook.io/sysahelper/main/telecom/main/vesr_greoveripsec
+
+### RTR-HQ
+```
+config
+security zone LAN-1
+exit
+security zone WAN
+exit
+interface te1/0/1
+  security-zone WAN
+exit
+interface te1/0/2
+  security-zone LAN-1
+exit
+
+```
+Разрешение ICMP из LAN:
+```
+security zone-pair LAN-1 self
+  rule 1
+    description "ICMP"
+    action permit
+    match protocol icmp
+    enable
+  exit
+exit
+```
+из WAN:
+```
+security zone-pair WAN self
+  rule 1
+    description "ICMP"
+    action permit
+    match protocol icmp
+    enable
+  exit
+exit
+```
+Prerouting:
+```
+security zone-pair LAN-1 WAN
+  rule 1
+    description "ICMP"
+    action permit
+    match protocol icmp
+    enable
+  exit
+exit
+```
+Туннель:
+```
+tunnel gre 1
+  ttl 16
+  security-zone WAN
+  local address 10.10.201.30
+  remote address 10.10.201.40
+  ip address 10.20.30.1/30
+  enable
+exit
+do commit
+do confirm
+```
 ## 10.	На сервере SRV-HQ сконфигурируйте основной доменный контроллер на базе FreeIPA
 
 a)	Создайте 30 пользователей user1-user30.  
