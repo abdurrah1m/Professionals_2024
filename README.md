@@ -281,9 +281,22 @@ interface te1/0/2
 exit
 
 ```
-Разрешение ICMP из LAN:
+### RTR-BR
 ```
-security zone-pair LAN-1 self
+security zone LAN-2
+exit
+security zone WAN
+exit
+interface te1/0/2
+  security-zone WAN
+exit
+interface te1/0/3
+  security-zone LAN-2
+exit
+```
+RTR-HQ | RTR-BR Разрешение ICMP из LAN:
+```
+security zone-pair LAN-2 self
   rule 1
     description "ICMP"
     action permit
@@ -305,7 +318,7 @@ exit
 ```
 Prerouting:
 ```
-security zone-pair LAN-1 WAN
+security zone-pair LAN-2 WAN
   rule 1
     description "ICMP"
     action permit
@@ -314,7 +327,7 @@ security zone-pair LAN-1 WAN
   exit
 exit
 ```
-Туннель:
+RTR-HQ Туннель:
 ```
 tunnel gre 1
   ttl 16
@@ -326,6 +339,115 @@ tunnel gre 1
 exit
 do commit
 do confirm
+```
+RTR-BR Туннель:
+```
+tunnel gre 1
+  ttl 16
+  security-zone WAN
+  local address 10.10.201.40
+  remote address 10.10.201.30
+  ip address 10.20.30.2/30
+  enable
+exit
+do commit
+do confirm
+```
+
+Маршрут по умолчанию для офиса HQ:
+```
+ip route 10.0.10.0/24 10.20.30.2
+```
+
+Маршрут по умолчанию для офиса BR:
+```
+ip route 10.0.20.0/24 10.20.30.1
+```
+
+RTR-HQ | RTR-BR Профиль IKE:
+```
+security ike proposal ike_prop1
+  authentication algorithm md5
+  encryption algorithm aes128
+  dh-group 2
+exit
+```
+RTR-HQ | RTR-BR Политика IKE:
+```
+security ike policy ike_pol1
+  pre-shared-key ascii-text P@ssw0rd
+  proposal ike_prop1
+exit
+```
+RTR-HQ Шлюз IKE:
+```
+security ike gateway ike_gw1
+  ike-policy ike_pol1
+  local address 10.10.201.30
+  local network 10.10.201.30/32 protocol gre 
+  remote address 10.10.201.40
+  remote network 10.10.201.40/32 protocol gre 
+  mode policy-based
+exit
+```
+
+RTR-BR Шлюз IKE:
+```
+security ike gateway ike_gw1
+  ike-policy ike_pol1
+  local address 10.10.201.40
+  local network 10.10.201.40/32 protocol gre 
+  remote address 10.10.201.30
+  remote network 10.10.201.30/32 protocol gre 
+  mode policy-based
+exit
+```
+
+RTR-HQ | RTR-BR Профиль безопасности для IPsec:
+```
+security ipsec proposal ipsec_prop1
+  authentication algorithm md5
+  encryption algorithm aes128
+  pfs dh-group 2
+exit
+```
+RTR-HQ | RTR-BR Политика IPsec:
+```
+security ipsec policy ipsec_pol1
+  proposal ipsec_prop1
+exit
+```
+RTR-HQ | RTR-BR IPsec VPN:
+```
+security ipsec vpn ipsec1
+  ike establish-tunnel route
+  ike gateway ike_gw1
+  ike ipsec-policy ipsec_pol1
+  enable
+exit
+```
+RTR-HQ | RTR-BR Firewall:
+```
+security zone-pair WAN self
+  rule 2
+    description "GRE"
+    action permit
+    match protocol gre
+    enable
+  exit
+  rule 3
+    description "ESP"
+    action permit
+    match protocol esp
+    enable
+  exit
+  rule 4
+    description "AH"
+    action permit
+    match protocol ah
+    enable
+  exit
+exit
 ```
 ## 10.	На сервере SRV-HQ сконфигурируйте основной доменный контроллер на базе FreeIPA
 
