@@ -148,23 +148,23 @@ a)	Настройте динамическую трансляцию адресо
 rtr-hq:
 ```
 config
-security zone UNTRUST
+security zone WAN
 exit
-security zone TRUST
+security zone LAN-1
 exit
 int te1/0/1
-security-zone UNTRUST
+security-zone WAN
 exit
 int te1/0/2
-security-zone TRUST
+security-zone LAN-1
 exit
 object-group network COMPANY
 ip address-range 10.0.10.1-10.0.10.254
 exit
 object-group network WAN
-ip address-range 10.10.201.30
+ip address-range 11.11.11.2
 exit
-security zone-pair TRUST UNTRUST
+security zone-pair WAN LAN-1
 rule 1
 match source-address COMPANY
 action permit
@@ -173,10 +173,10 @@ exit
 exit
 nat source
 pool WAN
-ip address-range 10.10.201.30
+ip address-range 11.11.11.2
 exit
 ruleset SNAT
-to zone UNTRUST
+to zone WAN
 rule 1
 match source-address COMPANY
 action source-nat pool WAN
@@ -189,23 +189,23 @@ confirm
 rtr-br:
 ```
 config
-security zone UNTRUST
+security zone WAN
 exit
-security zone TRUST
+security zone LAN-2
 exit
-int te1/0/2
-security-zone UNTRUST
+int te1/0/4
+security-zone WAN
 exit
 int te1/0/3
-security-zone TRUST
+security-zone LAN-2
 exit
 object-group network COMPANY
 ip address-range 10.0.20.1-10.0.20.254
 exit
 object-group network WAN
-ip address-range 10.10.201.40
+ip address-range 22.22.22.2
 exit
-security zone-pair TRUST UNTRUST
+security zone-pair WAN LAN-2
 rule 1
 match source-address COMPANY
 action permit
@@ -214,10 +214,10 @@ exit
 exit
 nat source
 pool WAN
-ip address-range 10.10.201.40
+ip address-range 22.22.22.2
 exit
 ruleset SNAT
-to zone UNTRUST
+to zone WAN
 rule 1
 match source-address COMPANY
 action source-nat pool WAN
@@ -266,21 +266,6 @@ d)	Для обеспечения динамической маршрутизац
 
 https://sysahelper.gitbook.io/sysahelper/main/telecom/main/vesr_greoveripsec
 
-### RTR-HQ
-```
-config
-security zone LAN-1
-exit
-security zone WAN
-exit
-interface te1/0/1
-  security-zone WAN
-exit
-interface te1/0/2
-  security-zone LAN-1
-exit
-
-```
 ### RTR-BR
 ```
 security zone LAN-2
