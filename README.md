@@ -380,20 +380,8 @@ d)	Для обеспечения динамической маршрутизац
 
 https://sysahelper.gitbook.io/sysahelper/main/telecom/main/vesr_greoveripsec
 
-### RTR-BR
-```
-security zone LAN-2
-exit
-security zone WAN
-exit
-interface te1/0/2
-  security-zone WAN
-exit
-interface te1/0/3
-  security-zone LAN-2
-exit
-```
-RTR-HQ | RTR-BR Разрешение ICMP из LAN:
+### RTR-HQ | RTR-BR  
+Разрешение ICMP из LAN:
 ```
 security zone-pair LAN-2 self
   rule 1
@@ -431,8 +419,8 @@ RTR-HQ Туннель:
 tunnel gre 1
   ttl 16
   security-zone WAN
-  local address 10.10.201.30
-  remote address 10.10.201.40
+  local address 11.11.11.2
+  remote address 22.22.22.2
   ip address 10.20.30.1/30
   enable
 exit
@@ -444,8 +432,8 @@ RTR-BR Туннель:
 tunnel gre 1
   ttl 16
   security-zone WAN
-  local address 10.10.201.40
-  remote address 10.10.201.30
+  local address 22.22.22.2
+  remote address 11.11.11.2
   ip address 10.20.30.2/30
   enable
 exit
@@ -482,10 +470,10 @@ RTR-HQ Шлюз IKE:
 ```
 security ike gateway ike_gw1
   ike-policy ike_pol1
-  local address 10.10.201.30
-  local network 10.10.201.30/32 protocol gre 
-  remote address 10.10.201.40
-  remote network 10.10.201.40/32 protocol gre 
+  local address 11.11.11.2
+  local network 11.11.11.2/32 protocol gre 
+  remote address 22.22.22.2
+  remote network 22.22.22.2/32 protocol gre 
   mode policy-based
 exit
 ```
@@ -494,10 +482,10 @@ RTR-BR Шлюз IKE:
 ```
 security ike gateway ike_gw1
   ike-policy ike_pol1
-  local address 10.10.201.40
-  local network 10.10.201.40/32 protocol gre 
-  remote address 10.10.201.30
-  remote network 10.10.201.30/32 protocol gre 
+  local address 22.22.22.2
+  local network 22.22.22.2/32 protocol gre 
+  remote address 11.11.11.2
+  remote network 11.11.11.2/32 protocol gre 
   mode policy-based
 exit
 ```
@@ -547,6 +535,45 @@ security zone-pair WAN self
     enable
   exit
 exit
+```
+### RTR-HQ | RTR-BR
+Включение OSPF:
+```
+router ospf 1
+  area 0.0.0.0
+    enable
+  exit
+  enable
+exit
+```
+Добавление интерфейсов туннель и внутренняя сеть:
+```
+int te1/0/3
+ip ospf instance 1
+ip ospf
+exit
+tunnel gre 1
+ip ospf instance 1
+ip ospf
+exit
+```
+Разрешение трафика OSPF:
+```
+security zone-pair WAN self
+  rule 3
+    description "OSPF"
+    action permit
+    match protocol ospf
+    enable
+  exit
+exit
+```
+Проверка 
+```
+sh ip ospf neighbors
+```
+```
+sh ip route
 ```
 ## 10.	На сервере SRV-HQ сконфигурируйте основной доменный контроллер на базе FreeIPA
 
