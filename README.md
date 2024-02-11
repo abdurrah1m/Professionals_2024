@@ -144,6 +144,72 @@ mount -av
 ```
 df -h
 ```
+
+### SRV-BR
+
+Создаем разделы:
+```
+gdisk /dev/sdb
+```
+o - y  
+n - 1 - enter - enter - 8e00  
+p  
+w - y  
+То же самое с `sdc`  
+Инициализация:
+```
+pvcreate /dev/sd{b,c}1
+```
+В группу:
+```
+vgcreate vg01 /dev/sd{b,c}1
+```
+Striped том:
+```
+lvcreate -i2 -l 100%FREE -n lvstreped vg01
+```
+> -i2 - количество полос  
+> -l 100%FREE - занять всё место  
+> -n lvstriped - имя 'lvstriped'  
+> vg01 - имя группы
+
+ФС:
+```
+mkfs.ext4 /dev/vg01/lvstriped
+```
+Создание ключа:
+```
+dd if=/dev/urandom of=/root/ext2.key bs=1 count=4096
+```
+Шифрование тома с помощью ключа:
+```
+cryptsetup luksFormat /dev/vg01/lvstriped /root/ext2.key
+```
+Открытие тома ключом:
+```
+cryptsetup luksOpen -d /root/ext2.key /dev/vg01/lvstriped lvstriped
+```
+ФС на расшифрованном томе:
+```
+mkfs.ext4 /dev/mapper/lvstriped
+```
+Директория монтирования:
+```
+mkdir /opt/data
+```
+Автозагрузка `/etc/fstab`
+```
+echo "UUID=$(blkid -s UUID -o value /dev/mapper/lvstriped) /opt/data ext4 defaults 0 0" | tee -a /etc/fstab
+```
+Монтаж:
+```
+mount -av
+```
+Автозагрузка зашифрованного тома с помощью ключа `/etc/crypttab`:
+```
+echo "lvstreped UUID=$(blkid -s UUID -o value /dev/vg01/lvstriped) /root/ext2.key luks" | tee -a /etc/crypttab
+```
+reboot, df -h, lsblk
 ## 3. Настройка коммутации
 
 a)	В качестве коммутаторов используются SW-HQ и SW-BR.  
