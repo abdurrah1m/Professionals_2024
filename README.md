@@ -263,10 +263,10 @@ security zone WAN
 exit
 security zone LAN-1
 exit
-int te1/0/1
+int te1/0/2
 security-zone WAN
 exit
-int te1/0/2
+int te1/0/3
 security-zone LAN-1
 exit
 object-group network COMPANY
@@ -380,10 +380,10 @@ d)	Для обеспечения динамической маршрутизац
 
 https://sysahelper.gitbook.io/sysahelper/main/telecom/main/vesr_greoveripsec
 
-### RTR-HQ | RTR-BR  
+### RTR-HQ  
 Разрешение ICMP из LAN:
 ```
-security zone-pair LAN-2 self
+security zone-pair LAN-1 self
   rule 1
     description "ICMP"
     action permit
@@ -391,6 +391,7 @@ security zone-pair LAN-2 self
     enable
   exit
 exit
+
 ```
 из WAN:
 ```
@@ -402,6 +403,45 @@ security zone-pair WAN self
     enable
   exit
 exit
+
+```
+Prerouting:
+```
+security zone-pair LAN-1 WAN
+  rule 1
+    description "ICMP"
+    action permit
+    match protocol icmp
+    enable
+  exit
+exit
+
+```
+
+### RTR-BR  
+Разрешение ICMP из LAN:
+```
+security zone-pair LAN-2 self
+  rule 1
+    description "ICMP"
+    action permit
+    match protocol icmp
+    enable
+  exit
+exit
+
+```
+из WAN:
+```
+security zone-pair WAN self
+  rule 1
+    description "ICMP"
+    action permit
+    match protocol icmp
+    enable
+  exit
+exit
+
 ```
 Prerouting:
 ```
@@ -413,6 +453,7 @@ security zone-pair LAN-2 WAN
     enable
   exit
 exit
+
 ```
 RTR-HQ Туннель:
 ```
@@ -458,6 +499,7 @@ security ike proposal ike_prop1
   encryption algorithm aes128
   dh-group 2
 exit
+
 ```
 RTR-HQ | RTR-BR Политика IKE:
 ```
@@ -465,6 +507,7 @@ security ike policy ike_pol1
   pre-shared-key ascii-text P@ssw0rd
   proposal ike_prop1
 exit
+
 ```
 RTR-HQ Шлюз IKE:
 ```
@@ -476,6 +519,7 @@ security ike gateway ike_gw1
   remote network 22.22.22.2/32 protocol gre 
   mode policy-based
 exit
+
 ```
 
 RTR-BR Шлюз IKE:
@@ -488,6 +532,7 @@ security ike gateway ike_gw1
   remote network 11.11.11.2/32 protocol gre 
   mode policy-based
 exit
+
 ```
 
 RTR-HQ | RTR-BR Профиль безопасности для IPsec:
@@ -497,12 +542,14 @@ security ipsec proposal ipsec_prop1
   encryption algorithm aes128
   pfs dh-group 2
 exit
+
 ```
 RTR-HQ | RTR-BR Политика IPsec:
 ```
 security ipsec policy ipsec_pol1
   proposal ipsec_prop1
 exit
+
 ```
 RTR-HQ | RTR-BR IPsec VPN:
 ```
@@ -512,6 +559,7 @@ security ipsec vpn ipsec1
   ike ipsec-policy ipsec_pol1
   enable
 exit
+
 ```
 RTR-HQ | RTR-BR Firewall:
 ```
@@ -535,6 +583,7 @@ security zone-pair WAN self
     enable
   exit
 exit
+
 ```
 ### RTR-HQ | RTR-BR
 Включение OSPF:
@@ -556,6 +605,7 @@ tunnel gre 1
 ip ospf instance 1
 ip ospf
 exit
+
 ```
 Разрешение трафика OSPF:
 ```
@@ -567,6 +617,7 @@ security zone-pair WAN self
     enable
   exit
 exit
+
 ```
 Проверка 
 ```
