@@ -101,6 +101,49 @@ b)	На SRV-BR сконфигурируйте stripped LVM том.
 &ensp; c.	Обеспечьте шифрование тома средствами dm-crypt. Диск должен монтироваться при загрузке ОС без запроса пароля.  
 &ensp; d.	Точка монтирования /opt/data.  
 
+### SRV-HQ
+
+Создаем разделы:
+```
+gdisk /dev/sdb
+```
+o - y  
+n - 1 - enter - enter - 8e00  
+p  
+w - y  
+То же самое с `sdc`  
+Инициализация:
+```
+pvcreate /dev/sd{b,c}1
+```
+В группу:
+```
+vgcreate vg01 /dev/sd{b,c}1
+```
+Логический том-зеркало RAID1:
+```
+lvcreate -l 100%FREE -n lvmirror -m1 vg01
+```
+Создаём ФС:
+```
+mkfs.ext4 /dev/vg01/lvmirror
+```
+Директория:
+```
+mkdir /opt/data
+```
+Автозагрузка `/etc/fstab`:
+```
+echo "UUID=$(blkid -s UUID -o value /dev/vg01/lvmirror) /opt/data ext4 defaults 1 2" | tee -a /etc/fstab
+```
+Монтаж:
+```
+mount -av
+```
+Проверка:
+```
+df -h
+```
 ## 3. Настройка коммутации
 
 a)	В качестве коммутаторов используются SW-HQ и SW-BR.  
