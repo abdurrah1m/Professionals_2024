@@ -146,6 +146,9 @@ a)	Настройте динамическую трансляцию адресо
 
 rtr-hq:
 ```
+ip route 0.0.0.0/0 11.11.11.1
+```
+```
 config
 security zone WAN
 exit
@@ -186,6 +189,9 @@ confirm
 
 ```
 rtr-br:
+```
+ip route 0.0.0.0/0 22.22.22.1
+```
 ```
 config
 security zone WAN
