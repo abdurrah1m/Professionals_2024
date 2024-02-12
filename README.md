@@ -640,6 +640,35 @@ b)	Настройте протокол динамической конфигур
 &ensp; ii.	Адрес шлюза по умолчанию – адрес маршрутизатора RTR-BR  
 &ensp; iii.	DNS-суффикс – company.prof  
 
+### RTR-HQ
+
+DNS-сервер - srv-hq
+```
+configure terminal
+ip dhcp-server pool COMPANY-HQ
+network 10.0.10.32/27
+default-lease-time 3:00:00
+address-range 10.0.10.33-10.0.10.62
+excluded-address-range 10.0.10.33                      
+default-router 10.0.10.33 
+dns-server 10.0.10.2
+domain-name company.prof
+exit
+```
+
+Включение DHCP-сервера:
+```
+ip dhcp-server
+```
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/d1818095-9c71-4d89-b3b3-3f6a9d8ef41c)
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/9a91aa12-c9d7-4b60-953a-398d714cbe39)
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/a0fbac34-90c8-4aae-9e96-92d178ba806c)
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/525dd722-2b8a-49f2-88e9-da0d2c05cb1d)
+
 ## 7.	Настройка DNS для SRV-HQ и SRV-BR
 
 i.	Реализуйте основной DNS сервер компании на SRV-HQ  
