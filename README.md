@@ -437,8 +437,7 @@ ens21 - cli-hq - vlan200
 
 Создаем каталоги для ens19,ens20,ens21:
 ```
-mkdir /etc/net/ifaces/ens19
-mkdir /etc/net/ifaces/ens2{0,1}
+mkdir /etc/net/ifaces/ens{19,20,21}
 ```
 
 Для моста:
