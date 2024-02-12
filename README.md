@@ -88,6 +88,7 @@ passwd sshuser
 P@ssw0rd
 P@ssw0rd
 echo "sshuser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+usermod -aG wheel admin
 sudo -i
 ```
 ## 2. Настройка дисковой подсистемы
