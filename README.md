@@ -912,7 +912,7 @@ router ospf 1
   enable
 exit
 ```
-Добавление интерфейсов туннель и внутренняя сеть:
+Добавление интерфейсов, туннель и подынтерфейсы:
 ```
 int te1/0/3
 ip ospf instance 1
@@ -922,12 +922,36 @@ tunnel gre 1
 ip ospf instance 1
 ip ospf
 exit
-
 ```
+
+vlan 100:
+```
+int te1/0/3.100
+ip ospf instance 1
+ip ospf
+exit
+```
+
+vlan 200:
+```
+int te1/0/3.200
+ip ospf instance 1
+ip ospf
+exit
+```
+
+vlan 300:
+```
+int te1/0/3.300
+ip ospf instance 1
+ip ospf
+exit
+```
+
 Разрешение трафика OSPF:
 ```
 security zone-pair WAN self
-  rule 3
+  rule 5
     description "OSPF"
     action permit
     match protocol ospf
@@ -943,6 +967,12 @@ sh ip ospf neighbors
 ```
 sh ip route
 ```
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/c77249a2-eec9-4b23-9992-a10e891f4a68)
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/fa2b8166-cc1f-4d7d-a230-7c0f8f882e6c)
+
+
 ## 10.	На сервере SRV-HQ сконфигурируйте основной доменный контроллер на базе FreeIPA
 
 a)	Создайте 30 пользователей user1-user30.  
