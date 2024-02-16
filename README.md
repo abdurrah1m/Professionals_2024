@@ -550,40 +550,29 @@ a)	Настройте динамическую трансляцию адресо
 rtr-hq:
 ```
 config
-security zone WAN
-exit
-security zone LAN-1
+security zone public
 exit
 int te1/0/2
-security-zone WAN
-exit
-int te1/0/3
-security-zone LAN-1
+security-zone public
 exit
 object-group network COMPANY
 ip address-range 10.0.10.1-10.0.10.254
 exit
 object-group network WAN
-ip address-range 11.11.11.2
-exit
-security zone-pair WAN LAN-1
-rule 1
-match source-address COMPANY
-action permit
-enable
-exit
+ip address-range 11.11.11.11
 exit
 nat source
 pool WAN
-ip address-range 11.11.11.2
+ip address-range 11.11.11.11
 exit
 ruleset SNAT
-to zone WAN
+to zone public
 rule 1
 match source-address COMPANY
 action source-nat pool WAN
 enable
-end
+exit
+exit
 commit
 confirm
 
@@ -591,40 +580,29 @@ confirm
 rtr-br:
 ```
 config
-security zone WAN
+security zone public
 exit
-security zone LAN-2
-exit
-int te1/0/4
-security-zone WAN
-exit
-int te1/0/3
-security-zone LAN-2
+int te1/0/2
+security-zone public
 exit
 object-group network COMPANY
 ip address-range 10.0.20.1-10.0.20.254
 exit
 object-group network WAN
-ip address-range 22.22.22.2
-exit
-security zone-pair WAN LAN-2
-rule 1
-match source-address COMPANY
-action permit
-enable
-exit
+ip address-range 22.22.22.22
 exit
 nat source
 pool WAN
-ip address-range 22.22.22.2
+ip address-range 22.22.22.22
 exit
 ruleset SNAT
-to zone WAN
+to zone public
 rule 1
 match source-address COMPANY
 action source-nat pool WAN
 enable
-end
+exit
+exit
 commit
 confirm
 
@@ -703,179 +681,83 @@ c)	Обеспечьте динамическую маршрутизацию: р�
 d)	Для обеспечения динамической маршрутизации используйте протокол OSPF.  
 
 https://sysahelper.gitbook.io/sysahelper/main/telecom/main/vesr_greoveripsec
-
-### RTR-HQ  
-Разрешение ICMP из LAN:
-```
-security zone-pair LAN-1 self
-  rule 1
-    description "ICMP"
-    action permit
-    match protocol icmp
-    enable
-  exit
-exit
-
-```
-из WAN:
-```
-security zone-pair WAN self
-  rule 1
-    description "ICMP"
-    action permit
-    match protocol icmp
-    enable
-  exit
-exit
-
-```
-Prerouting:
-```
-security zone-pair LAN-1 WAN
-  rule 1
-    description "ICMP"
-    action permit
-    match protocol icmp
-    enable
-  exit
-exit
-
-```
-
-### RTR-BR  
-Разрешение ICMP из LAN:
-```
-security zone-pair LAN-2 self
-  rule 1
-    description "ICMP"
-    action permit
-    match protocol icmp
-    enable
-  exit
-exit
-
-```
-из WAN:
-```
-security zone-pair WAN self
-  rule 1
-    description "ICMP"
-    action permit
-    match protocol icmp
-    enable
-  exit
-exit
-
-```
-Prerouting:
-```
-security zone-pair LAN-2 WAN
-  rule 1
-    description "ICMP"
-    action permit
-    match protocol icmp
-    enable
-  exit
-exit
-
-```
-RTR-HQ Туннель:
 ```
 tunnel gre 1
   ttl 16
-  security-zone WAN
-  local address 11.11.11.2
-  remote address 22.22.22.2
-  ip address 10.20.30.1/30
+  ip firewall disable
+  local address 11.11.11.11
+  remote address 22.22.22.22
+  ip address 172.16.1.1/30
   enable
 exit
-do commit
-do confirm
 ```
-RTR-BR Туннель:
 ```
-tunnel gre 1
-  ttl 16
-  security-zone WAN
-  local address 22.22.22.2
-  remote address 11.11.11.2
-  ip address 10.20.30.2/30
-  enable
+security zone-pair public self
+  rule 1
+    description "ICMP"
+    action permit
+    match protocol icmp
+    enable
+  exit
+  rule 2
+    description "GRE"
+    action permit
+    match protocol gre
+    enable
+  exit
 exit
-do commit
-do confirm
 ```
 
-Маршрут по умолчанию для офиса HQ:
-```
-ip route 10.0.10.0/24 10.20.30.2
-```
-
-Маршрут по умолчанию для офиса BR:
-```
-ip route 10.0.20.0/24 10.20.30.1
-```
-
-RTR-HQ | RTR-BR Профиль IKE:
 ```
 security ike proposal ike_prop1
   authentication algorithm md5
   encryption algorithm aes128
   dh-group 2
 exit
-
 ```
-RTR-HQ | RTR-BR Политика IKE:
+
 ```
 security ike policy ike_pol1
   pre-shared-key ascii-text P@ssw0rd
   proposal ike_prop1
 exit
-
-```
-RTR-HQ Шлюз IKE:
-```
-security ike gateway ike_gw1
-  ike-policy ike_pol1
-  local address 11.11.11.2
-  local network 11.11.11.2/32 protocol gre 
-  remote address 22.22.22.2
-  remote network 22.22.22.2/32 protocol gre 
-  mode policy-based
-exit
-
 ```
 
-RTR-BR Шлюз IKE:
 ```
 security ike gateway ike_gw1
   ike-policy ike_pol1
-  local address 22.22.22.2
-  local network 22.22.22.2/32 protocol gre 
-  remote address 11.11.11.2
-  remote network 11.11.11.2/32 protocol gre 
+  local address 11.11.11.11
+  local network 11.11.11.11/32 protocol gre 
+  remote address 22.22.22.22
+  remote network 22.22.22.22/32 protocol gre 
   mode policy-based
 exit
-
 ```
 
-RTR-HQ | RTR-BR Профиль безопасности для IPsec:
+```
+security ike gateway ike_gw1
+  ike-policy ike_pol1
+  local address 22.22.22.22
+  local network 22.22.22.22/32 protocol gre 
+  remote address 11.11.11.11
+  remote network 11.11.11.11/32 protocol gre 
+  mode policy-based
+exit
+```
+
 ```
 security ipsec proposal ipsec_prop1
   authentication algorithm md5
   encryption algorithm aes128
   pfs dh-group 2
 exit
-
 ```
-RTR-HQ | RTR-BR Политика IPsec:
+
 ```
 security ipsec policy ipsec_pol1
   proposal ipsec_prop1
 exit
-
 ```
-RTR-HQ | RTR-BR IPsec VPN:
 ```
 security ipsec vpn ipsec1
   ike establish-tunnel route
@@ -883,17 +765,10 @@ security ipsec vpn ipsec1
   ike ipsec-policy ipsec_pol1
   enable
 exit
+```
 
 ```
-RTR-HQ | RTR-BR Firewall:
-```
-security zone-pair WAN self
-  rule 2
-    description "GRE"
-    action permit
-    match protocol gre
-    enable
-  exit
+security zone-pair public self
   rule 3
     description "ESP"
     action permit
@@ -907,10 +782,8 @@ security zone-pair WAN self
     enable
   exit
 exit
-
 ```
-### RTR-HQ | RTR-BR
-Включение OSPF:
+
 ```
 router ospf 1
   area 0.0.0.0
@@ -919,45 +792,31 @@ router ospf 1
   enable
 exit
 ```
-Добавление интерфейсов, туннель и подынтерфейсы:
+
 ```
-int te1/0/3
-ip ospf instance 1
-ip ospf
-exit
 tunnel gre 1
-ip ospf instance 1
-ip ospf
+  ip ospf instance 1
+  ip ospf
+exit
+
+interface gigabitethernet 1/0/2.100
+  ip ospf instance 1
+  ip ospf
+exit
+
+interface gigabitethernet 1/0/2.200
+  ip ospf instance 1
+  ip ospf
+exit
+
+interface gigabitethernet 1/0/2.300
+  ip ospf instance 1
+  ip ospf
 exit
 ```
 
-vlan 100:
 ```
-int te1/0/3.100
-ip ospf instance 1
-ip ospf
-exit
-```
-
-vlan 200:
-```
-int te1/0/3.200
-ip ospf instance 1
-ip ospf
-exit
-```
-
-vlan 300:
-```
-int te1/0/3.300
-ip ospf instance 1
-ip ospf
-exit
-```
-
-Разрешение трафика OSPF:
-```
-security zone-pair WAN self
+security zone-pair public self
   rule 5
     description "OSPF"
     action permit
@@ -965,6 +824,7 @@ security zone-pair WAN self
     enable
   exit
 exit
+```
 
 ```
 Проверка 
