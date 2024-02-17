@@ -824,6 +824,40 @@ named-checkconf -z
 
 ![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/21d53c0b-27d9-4af9-bbe3-b64035b0ffad)
 
+### SRV-BR
+
+Конфиг
+```
+vim /etc/bind/options.conf
+```
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/e90d49ce-6735-4fdb-b44a-0b1c62b8305a)
+
+Добавляем зоны
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/ea22291d-0b41-4044-a271-1fbb32f26185)
+
+Резолв `/etc/net/ifaces/ens18/resolv.conf`:
+```
+search company.prof
+nameserver 10.0.10.2
+nameserver 10.0.20.2
+```
+Перезапуск адаптера:
+```
+systemctl restart network
+```
+Автозагрузка:
+```
+systemctl enable --now bind
+```
+SLAVE:
+```
+control bind-slave enabled
+```
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/dc174c7e-e960-42c6-8b9d-7522df00989a)
+
 
 ## 8.	Настройка узла управления Ansible
 
