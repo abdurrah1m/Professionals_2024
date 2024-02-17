@@ -543,6 +543,95 @@ b)	Разверните сервер баз данных на базе Postgresq
 &ensp; &ensp; iii.	Выбор standby режима (RO/RW) остается на усмотрение участника.  
 &ensp; &ensp; iv.	Обеспечьте единую точку подключения к СУБД по имени dbms.company.prof  
 
+### SRV-HQ
+
+Установка `postgresql`:
+```
+apt-get install -y postgresql16 postgresql16-server postgresql16-contrib
+```
+Развертываем БД:
+```
+/etc/init.d/postgresql initdb
+```
+Автозагрузка:
+```
+systemctl enable --now postgresql
+```
+Включаем прослушивание всех адресов:
+```
+nano /var/lib/pgsql/data/postgresql.conf
+```
+
+![изображение](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/6cfbc559-b14f-49bd-a62e-5208bdb54aba)
+
+Перезагружаем:
+```
+systemctl restart postgresql
+```
+Проверяем:
+```
+ss -tlpn | grep postgres
+```
+
+Заходим в БД под рутом:
+```
+psql -U postgres
+```
+Создаем базы данных "prod","test","dev":
+```
+CREATE DATABASE prod;
+```
+```
+CREATE DATABASE test;
+```
+```
+CREATE DATABASE dev;
+```
+Создаем пользователей "produser","testuser","devuser":
+```
+CREATE USER produser WITH PASSWORD 'P@ssw0rd';
+```
+```
+CREATE USER testuser WITH PASSWORD 'P@ssw0rd';
+```
+```
+CREATE USER devuser WITH PASSWORD 'P@ssw0rd';
+```
+Назначаем на БД владельца:
+```
+GRANT ALL PRIVILEGES ON DATABASE prod to produser;
+```
+```
+GRANT ALL PRIVILEGES ON DATABASE test to testuser;
+```
+```
+GRANT ALL PRIVILEGES ON DATABASE dev to devuser;
+```
+Заполняем БД с помощью `pgbench`:
+```
+pgqbench -U postgres -i prod
+```
+```
+pgqbench -U postgres -i test
+```
+```
+pgqbench -U postgres -i dev
+```
+Проверяем
+
+![изображение](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/555b8fd9-9c1e-4d94-9f17-799bcc40435f)
+
+Настройка аутентификации для удаленного доступа:
+```
+nano /var/lib/pgsql/data/pg_hba.conf
+```
+
+![изображение](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/514da535-fe56-4186-8e78-78fa5f1baf04)
+
+Перезапускаем:
+```
+systemctl restart postgresql
+```
 ## 5.	Настройка динамической трансляции адресов
 
 a)	Настройте динамическую трансляцию адресов для обоих офисов. Доступ к интернету необходимо разрешить со всех устройств.  
@@ -663,6 +752,69 @@ i.	Реализуйте основной DNS сервер компании на 
 ```
 apt-get update && apt-get install -y bind bind-utils
 ```
+Конфиг:
+```
+nano /etc/bind/options.conf
+```
+```
+listen-on { any; };
+allow-query { any; };
+allow-transfer { 10.0.20.2; }; 
+```
+
+![изображение](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/12ad33f9-2df1-47e7-ad7a-1788b2276c88)
+
+Включаем resolv:
+```
+nano /etc/net/ifaces/ens18/resolv.conf
+```
+```
+systemctl restart network
+```
+Автозагрузка bind:
+```
+systemctl enable --now bind
+```
+Создаем прямую и обратные зоны:
+```
+nano /etc/bind/local.conf
+```
+
+![изображение](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/74bbb72d-1577-413d-969c-bff4497d0b9c)
+
+Копируем дефолты:
+```
+cp /etc/bind/zone/{localhost,company.db}
+```
+```
+cp /etc/bind/zone/127.in-addr.arpa /etc/bind/zone/10.0.10.in-addr.arpa.db
+```
+```
+cp /etc/bind/zone/127.in-addr.arpa /etc/bind/zone/20.0.10.in-addr.arpa.db
+```
+Назначаем права:
+```
+chown root:named /etc/bind/zone/company.db
+```
+```
+chown root:named /etc/bind/zone/10.0.10.in-addr.arpa.db
+```
+```
+chown root:named /etc/bind/zone/20.0.10.in-addr.arpa.db
+```
+Настраиваем зону прямого просмотра `/etc/bind/zone/company.prof`:
+
+![изображение](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/9d3bddf9-e8db-4cfc-8971-b3a6ff0f38ac)
+
+Настраиваем зону обратного просмотра `/etc/bind/zone/10.0.10.in-addr.arpa.db`:
+
+![изображение](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/3fee1532-458b-4e10-967f-b858a4a43b63)
+
+Настраиваем зону обратного просмотра `/etc/bind/zone/20.0.10.in-addr.arpa.db`:
+
+![изображение](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/c9f18689-b324-4125-836d-91bdb23b1075)
+
+
 ## 8.	Настройка узла управления Ansible
 
 a)	Настройте узел управления на базе SRV-BR  
