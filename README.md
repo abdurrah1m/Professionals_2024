@@ -200,7 +200,7 @@ passwd sshuser
 P@ssw0rd
 P@ssw0rd
 echo "sshuser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-usermod -aG wheel admin
+usermod -aG wheel sshuser
 sudo -i
 ```
 
@@ -813,6 +813,16 @@ chown root:named /etc/bind/zone/20.0.10.in-addr.arpa.db
 Настраиваем зону обратного просмотра `/etc/bind/zone/20.0.10.in-addr.arpa.db`:
 
 ![изображение](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/c9f18689-b324-4125-836d-91bdb23b1075)
+
+Проверка зон:
+```
+named-checkconf -z
+```
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/d2de05e9-3830-4846-86a1-2974bb64dbf5)
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/e1b6fb80-63df-4cf5-8dd6-2f3d46a1dc3b)
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/21d53c0b-27d9-4af9-bbe3-b64035b0ffad)
 
 
 ## 8.	Настройка узла управления Ansible
