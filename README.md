@@ -958,6 +958,7 @@ vim group_vars/all.yml
 
 ![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/a3c7e3de-d1fb-4a08-bc55-cc0765404a36)
 
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/f2ccec52-702a-4ba5-8c61-ba3dd9c5d147)
 
 ## 9.	Между маршрутизаторами RTR-HQ и RTR-BR сконфигурируйте защищенное соединение
 
