@@ -858,6 +858,53 @@ control bind-slave enabled
 
 ![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/dc174c7e-e960-42c6-8b9d-7522df00989a)
 
+Разрешение имени хоста test
+
+### SRV-HQ
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/a73800a1-b7cf-48e3-8160-49b3b14a0060)
+
+Копируем дефолт для зоны:
+```
+cp /etc/bind/zone/{localdomain,test.company.db}
+```
+
+Задаём права, владельца:
+```
+chown root:named /etc/bind/zone/test.company.db
+```
+Настраиваем зону:
+```
+vim /etc/bind/zone/test.company.db
+```
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/ae1dcd6e-d5b9-4980-8105-d14b74905083)
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/c8735610-56d5-419b-bdc8-3efc48a969b0)
+
+Перезапускаем:
+```
+systemctl restart bind
+```
+
+### SRV-BR
+Добавляем зону `/etc/bind/local.conf`:
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/2d279b81-8bfd-453b-8efa-dc3d87476c40)
+
+Задаём права, владельца:
+```
+chown root:named /etc/bind/zone/test.company.db
+```
+
+Редактируем зону `/etc/bind/zone/test.company.db`:
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/1aa398ac-dd3a-4887-b975-14ff7a3bf633)
+
+Перезапускаем:
+```
+systemctl restart bind
+```
 
 ## 8.	Настройка узла управления Ansible
 
@@ -868,6 +915,49 @@ b)	Сконфигурируйте инвентарь по пути /etc/ansible/
 &ensp; b.	Servers  
 &ensp; c.	Clients  
 c)	Напишите плейбук в /etc/ansible/gathering.yml для сбора информации об IP адресах и именах всех устройств (и клиенты, и серверы, и роутеры). Отчет должен быть сохранен в /etc/ansible/output.yaml, в формате ПОЛНОЕ_ДОМЕННОЕ_ИМЯ – АДРЕС  
+
+Установка:
+```
+apt-get install -y ansible sshpass
+```
+```
+vim /etc/ansible/inventory.yml
+```
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/4c242402-3a03-43e2-8787-e66ba00b0e56)
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/6f656c35-a863-476d-a3a4-52dee8117017)
+
+```
+cd /etc/ansible
+```
+```
+mkdir group_vars
+```
+```
+vim group_vars/Networking.yml
+```
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/4697fc7a-4b22-4c6f-a9ec-6a47b66b1809)
+
+```
+vim group_vars/Servers.yml
+```
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/d07a5898-8852-4890-8eaa-4c8269d68e1d)
+
+```
+vim group_vars/Clients.yml
+```
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/8100d601-0482-4e7a-aecd-0671f2a39d90)
+
+```
+vim group_vars/all.yml
+```
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/a3c7e3de-d1fb-4a08-bc55-cc0765404a36)
+
 
 ## 9.	Между маршрутизаторами RTR-HQ и RTR-BR сконфигурируйте защищенное соединение
 
