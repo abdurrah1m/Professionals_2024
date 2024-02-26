@@ -304,6 +304,9 @@ b)	На SRV-BR сконфигурируйте stripped LVM том.
 &ensp; c.	Обеспечьте шифрование тома средствами dm-crypt. Диск должен монтироваться при загрузке ОС без запроса пароля.  
 &ensp; d.	Точка монтирования /opt/data.  
 
+<details>
+  <summary>ТЫКНИ</summary>
+
 ### SRV-HQ
 
 Создаем разделы:
@@ -413,6 +416,9 @@ mount -av
 echo "lvstreped UUID=$(blkid -s UUID -o value /dev/vg01/lvstriped) /root/ext2.key luks" | tee -a /etc/crypttab
 ```
 reboot, df -h, lsblk
+
+</details>
+
 ## 3. Настройка коммутации
 
 a)	В качестве коммутаторов используются SW-HQ и SW-BR.  
