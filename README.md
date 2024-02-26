@@ -654,6 +654,86 @@ nano /var/lib/pgsql/data/pg_hba.conf
 systemctl restart postgresql
 ```
 
+### SRV-BR
+
+Установка:
+```
+apt-get install -y postgresql16 postgresql16-server postgresql16-contrib
+```
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/385d4826-5df8-475a-84e0-c6ccee7422e9)
+
+## Репликация
+
+### SRV-HQ
+
+Конфиг
+```
+nano /var/lib/pgsql/data/postgresql.conf
+```
+```
+wal_level = replica
+max_wal_senders = 2
+max_replication_slots = 2
+hot_standby = on
+hot_standby_feedback = on
+```
+
+> wal_level указывает, сколько информации записывается в WAL (журнал операций, который используется для репликации);
+> max_wal_senders — количество планируемых слейвов;
+> max_replication_slots — максимальное число слотов репликации; 
+> hot_standby — определяет, можно ли подключаться к postgresql для выполнения запросов в процессе восстановления;
+> hot_standby_feedback — определяет, будет ли сервер slave сообщать мастеру о запросах, которые он выполняет.
+
+```
+systemctl restart postgresql
+```
+
+### SRV-BR
+
+Останавливаем:
+```
+systemctl stop postgresql
+```
+
+Удаляем каталог:
+```
+rm -rf /var/lib/pgsql/data/*
+```
+
+Запускаем репликацию (может длиться несколько десятков минут):
+```
+pg_basebackup -h 10.0.10.2 -U postgres -D /var/lib/pgsql/data --wal-method=stream --write-recovery-conf
+```
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/dd67d507-8fe2-4e6e-b18a-55ebcb7286d9)
+
+
+Назначаем владельца:
+```
+chown -R postgres:postgres /var/lib/pgsql/data/
+```
+
+Запускаем:
+```
+systemctl start postgresql
+```
+
+### SRV-HQ
+
+Создаем тест:
+```
+psql -U postgres
+```
+```
+CREATE DATABASE testik;
+```
+
+### SRV-BR
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/132c023d-ddcd-4350-9cb5-84e18fb99751)
+
+
 </details>
 
 ## 5.	Настройка динамической трансляции адресов
