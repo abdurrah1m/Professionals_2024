@@ -53,6 +53,9 @@
 
 ### Внеполосное управление виртуалками в Proxmox
 
+<details>
+  <summary>ТЫКНИ</summary>
+  
 Добавление serial порта в Гипервизоре:
 ```
 qm set <VM ID> -serial0 socket
@@ -79,6 +82,8 @@ systemctl enable serial-getty@ttyS0.service
 ```
 Перезагружаемся и заходим через `xterm.js`. Теперь доступны скроллинг, вставка, копирование и произвольный размер окна.
 
+</details>
+  
 ## 1. Базовая настройка
 
 a) Настройте имена устройств согласно топологии  
@@ -732,6 +737,10 @@ CREATE DATABASE testik;
 ### SRV-BR
 
 ![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/132c023d-ddcd-4350-9cb5-84e18fb99751)
+
+## HAPROXY
+
+### SW-HQ
 
 
 </details>
