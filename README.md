@@ -1080,39 +1080,84 @@ c)	Напишите плейбук в /etc/ansible/gathering.yml для сбор
 apt-get install -y ansible sshpass
 ```
 ```
-vim /etc/ansible/inventory.yml
+nano /etc/ansible/inventory.yml
+```
+```yml
+Networking:
+  hosts:
+    rtr-hq:
+      ansible_host: 10.0.10.1
+      ansible_user: admin
+      ansible_password: P@ssw0rd
+      ansible_port: 22
+    rtr-br:
+      ansible_host: 10.0.20.1
+      ansible_user: admin
+      ansible_password: P@ssw0rd
+      ansible_port: 22
+Servers:
+  hosts:
+    srv-hq:
+      ansible_host: 10.0.10.2
+      ansible_ssh_private_key_file: ~/.ssh/srv_ssh_key
+      ansible_user: sshuser
+      ansible_port: 2023
+    srv-br:
+      ansible_host: 10.0.20.2
+      ansible_ssh_private_key_file: ~/.ssh/srv_ssh_key
+      ansible_user: sshuser
+      ansible_port: 22
+Clients:
+  hosts:
+    cli-hq:
+      ansible_host: 10.0.10.34
+      ansible_user: root
+      ansible_password: P@ssw0rd
+      ansible_port: 22
+    cli-br:
+      ansible_host: 10.0.20.34
+      ansible_user: root
+      ansible_password: P@ssw0rd
+      ansible_port: 22
+```
+```
+nano /etc/ansible/ansible.cfg
 ```
 
-![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/4c242402-3a03-43e2-8787-e66ba00b0e56)
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/534a5b2d-380e-4659-8455-98883556eb9f)
 
-![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/6f656c35-a863-476d-a3a4-52dee8117017)
+```
+nano /etc/ansible/gathering.yml
+```
+```yml
+---
+- name: show ip and hostname from routers
+  hosts: Networking
+  gather_facts: false
+  tasks:
+  - name: show ip
+    esr_command:
+      commands: show ip interfaces
 
+- name: show ip and fqdn
+  hosts: Servers, Clients
+  tasks:
+  - name: print ip and hostname
+    debug:
+      msg: "IP address: {{ ansible_default_ipv4.address }}, Hostname {{ ansible_hostname }}"
+  - name: create file
+    copy:
+      content: ""
+      dest: /etc/ansible/output.yml
+      mode: '0644'
+
+  - name: save output
+    copy:
+      content: "IP address: {{ ansible_default_ipv4.address }}, Hostname {{ ansible_hostname }}"
+      dest: /etc/ansible/output.yml
+```
 ```
 cd /etc/ansible
-```
-```
-mkdir group_vars
-```
-```
-vim group_vars/Networking.yml
-```
-
-![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/4697fc7a-4b22-4c6f-a9ec-6a47b66b1809)
-
-```
-vim group_vars/Servers.yml
-```
-
-![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/d07a5898-8852-4890-8eaa-4c8269d68e1d)
-
-```
-vim group_vars/Clients.yml
-```
-
-![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/8100d601-0482-4e7a-aecd-0671f2a39d90)
-
-```
-vim group_vars/all.yml
 ```
 
 ![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/a3c7e3de-d1fb-4a08-bc55-cc0765404a36)
