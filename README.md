@@ -740,8 +740,36 @@ CREATE DATABASE testik;
 
 ## HAPROXY
 
-### SW-HQ
+### SW-HQ (test, not prod)
 
+Установка haproxy:
+```
+apt-get install haproxy
+```
+Автозагрузка:
+```
+systemctl enable --now haproxy
+```
+Конфиг `/etc/haproxy/haproxy.cfg`:
+```
+listen stats
+    bind 0.0.0.0:8989
+    mode http
+    stats enable
+    stats uri /haproxy_stats
+    stats realm HAProxy\ Statistics
+    stats auth admin:toor
+    stats admin if TRUE
+
+frontend postgre
+    bind 0.0.0.0:5432
+    default_backend my-web
+
+backend postgre
+    balance first
+    server srv-hq 10.0.10.2:5432 check
+    server srv-br 10.0.20.2:5432 check
+```
 
 </details>
 
