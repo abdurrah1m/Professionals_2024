@@ -372,7 +372,7 @@ vgcreate vg01 /dev/sd{b,c}1
 ```
 Striped том:
 ```
-lvcreate -i2 -l 100%FREE -n lvstreped vg01
+lvcreate -i2 -l 100%FREE -n lvstriped vg01
 ```
 > -i2 - количество полос  
 > -l 100%FREE - занять всё место  
