@@ -1377,7 +1377,19 @@ f)	Авторизация для proxy спрашивается браузеро
 <details>
   <summary>ТЫКНИ</summary>
 
-Пока что нет
+## SRV-BR
+
+
+## SRV-HQ
+
+Установка:
+```
+apt-get install alterator-squid
+```
+Доступ осуществляется по `https://ip-address:8080/`
+
+![image](https://github.com/abdurrah1m/Professionals_2024/assets/148451230/1def4702-a3ce-4862-8d03-ceb34e7b1fdd)
+
 
 </details>
 
